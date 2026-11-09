@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<nlog xmlns="http://www.nlog-project.org/schemas/NLog.xsd"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <!--
+    Mahyar Music – NLog configuration for TS3AudioBot 0.12.0.
+    Rendered by the container entrypoint from docker/nlog.config.template;
+    the minimum level comes from the LOG_LEVEL environment variable.
+    Never log secrets: the bot does not log passwords or identity keys.
+  -->
+  <targets>
+    <target name="console" type="ColoredConsole"
+            layout="[${level:uppercase=true:padding=-5}] ${message}${onexception:inner= | ${exception:format=type,message}}" />
+  </targets>
+
+  <rules>
+    <logger name="TS3AudioBot.*" minlevel="__MINLEVEL__" writeTo="console" final="true" />
+    <logger name="TSLib.*" minlevel="__MINLEVEL__" writeTo="console" final="true" />
+    <logger name="*" minlevel="__MINLEVEL__" writeTo="console" />
+  </rules>
+</nlog>

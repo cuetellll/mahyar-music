@@ -1,0 +1,94 @@
+# =============================================================================
+# ts3audiobot.toml – REFERENCE ONLY (not read by the bot)
+# -----------------------------------------------------------------------------
+# This file documents exactly what the Mahyar Music entrypoint generates for
+# TS3AudioBot 0.12.0 from the environment variables in .env.example.
+# The real files live on the persistent volume:
+#
+#   /data/bot/ts3audiobot.toml               (root config, no secrets)
+#   /data/bot/bots/mahyar-music/bot.toml     (bot config, CONTAINS THE IDENTITY)
+#
+# Keys and their defaults were verified against the upstream source of
+# TS3AudioBot 0.12.0 (TS3AudioBot/Config/ConfigStructs.cs).
+# =============================================================================
+
+# ---- /data/bot/ts3audiobot.toml ---------------------------------------------
+
+[configs]
+bots_path = "/data/bot/bots"
+send_stats = false          # upstream default true; disabled for privacy
+
+[db]
+path = "/data/bot/ts3audiobot.db"
+
+[factories]
+media = { path = "/data/bot/music" }   # search path for `!play <file>`
+
+[tools]
+ffmpeg = { path = "ffmpeg" }
+
+[rights]
+path = "/data/bot/rights.toml"
+
+[plugins]
+path = "/data/bot/plugins"
+
+[web]
+hosts = ["localhost"]
+port = 58913
+
+[web.api]
+enabled = false             # Phase 4 will enable the Web API deliberately
+
+[web.interface]
+enabled = false             # Phase 4 will enable the web dashboard
+
+[bot]
+language = "en"
+run = false                 # each bot file decides (see below)
+generate_status_avatar = false
+set_status_description = true
+
+# ---- /data/bot/bots/mahyar-music/bot.toml -----------------------------------
+# !! The real bot.toml contains the private TeamSpeak identity (chmod 600). !!
+
+run = true
+language = "en"
+
+[connect]
+address = "ts3.example.com:9987"       # from TS3_HOST + TS3_VOICE_PORT
+name = "Mahyar Music"                  # from TS3_NICKNAME
+channel = "/123"                       # from TS3_CHANNEL_ID ("/<id>") or TS3_CHANNEL_PATH
+
+[connect.server_password]              # only written if TS3_SERVER_PASSWORD is set
+pw = "..."
+hashed = false
+autohash = true
+
+[connect.channel_password]             # only written if TS3_CHANNEL_PASSWORD is set
+pw = "..."
+hashed = false
+autohash = true
+
+[connect.identity]
+# ||| DO NOT MAKE THIS KEY PUBLIC |||
+# Imported TeamSpeak3 client identity (levelVbase64), see docs/SECURITY.md.
+key = "8VAAAA...."
+offset = 0
+level = -1                  # -1 = adapt the security level on demand
+
+[audio]
+send_mode = "voice"         # audible for the whole channel ('whisper' would not be)
+bitrate = 48
+
+[audio.volume]
+default = 50
+min = 25
+max = 75
+
+[reconnect]
+ontimeout = ["1s", "2s", "5s", "10s", "30s", "1m", "5m", "repeat last"]
+onkick = []
+onban = []
+onerror = ["30s", "repeat last"]
+onshutdown = ["5m"]
