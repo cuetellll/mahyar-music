@@ -4,8 +4,12 @@
 # Base:   Debian 12 (bookworm) slim
 # Engine: TS3AudioBot 0.12.0 – official self-contained linux-x64 release build
 #         (the .NET runtime is bundled; no .NET installation is required)
-# Needs:  ffmpeg (transcoding) + libopus (voice codec) + libicu (.NET
-#         globalization)
+# Needs:  ffmpeg (transcoding) + libopus (voice codec)
+#
+# NOTE: no libicu on purpose — the pinned .NET Core 3.1 runtime inside the
+# 0.12.0 build only knows ICU <= 67 and would FailFast on Debian 12's ICU 72.
+# The entrypoint sets DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 instead (safe
+# for this bot; no locale formatting is used).
 #
 # The release tarball is pinned by version AND sha256 below. Verified on
 # 2026-11-09 against https://github.com/Splamy/TS3AudioBot/releases/tag/0.12.0
@@ -25,7 +29,6 @@ RUN apt-get update \
 		curl \
 		ffmpeg \
 		gosu \
-		libicu72 \
 		libopus0 \
 	&& rm -rf /var/lib/apt/lists/*
 

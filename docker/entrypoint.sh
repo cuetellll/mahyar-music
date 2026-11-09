@@ -414,7 +414,13 @@ mm_run_bot() {
 		fi
 
 		cd "$BOT_ROOT"
+		# DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1: the pinned TS3AudioBot 0.12.0
+		# build targets .NET Core 3.1, whose hardcoded ICU version list predates
+		# Debian 12's ICU 72 -> without this flag it FailFasts at startup
+		# ("Couldn't find a valid ICU package"). The bot does not need locale
+		# formatting; upstream recommends invariant mode for such environments.
 		gosu "$APP_USER:$APP_GROUP" env HOME="$APP_HOME" LANG=C.UTF-8 \
+			DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 \
 			"$BOT_INSTALL_DIR/TS3AudioBot" \
 			--config "$BOT_ROOT/ts3audiobot.toml" \
 			--non-interactive \

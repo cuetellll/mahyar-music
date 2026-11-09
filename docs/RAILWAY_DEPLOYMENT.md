@@ -138,6 +138,8 @@
 | خطای فرمت هویت | فایل ini ناقص یا خراب Export شده | دوباره Export کنید؛ خط `identity=` باید `عددVرشته‌base64` باشد |
 | DNS resolution failure | نام سرور اشتباه | `TS3_HOST` را بررسی کنید؛ `bash /app/scripts/test-connection.sh` |
 | بات start می‌شود ولی به سرور وصل نمی‌شود و خطای timeout می‌دهد | مسدود بودن UDP خروجی در زیرساخت | ادامه‌ی همین بخش |
+| `Process terminated. Couldn't find a valid ICU package...` | runtime قدیمی .NET Core 3.1 نسخه‌های ICU جدید را نمی‌شناسد | از نسخه‌ی فعلی مخزن استفاده کنید: entrypoint حالت `DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1` را ست می‌کند و ایمیج دیگر libicu ندارد (کامیت مربوطه را push و Redeploy کنید) |
+| هنگام `!play <https-url>` خطای بارگذاری کتابخانه (`libssl.so.1.1`) | محدودیت شناخته‌شده‌ی همین نسخه‌ی پین‌شده: .NET Core 3.1 فقط OpenSSL 1.1 را می‌شناسد و Debian 12 فقط OpenSSL 3 دارد | پخش فایل محلی و اتصال صوتی تأثیر نمی‌پذیرد؛ پخش HTTPS در فاز ۲ باید تصمیم معماری بگیرد (build از سورس روی .NET جدید، یا افزودن libssl1.1 پین‌شده) |
 | بات وصل است ولی صدای کسی شنیده نمی‌شود | صدا در حالت whisper یا رمز/دسترسی کانال | `!volume 50`؛ در فاز ۱ `send_mode = "voice"` از قبل تنظیم است |
 
 ### اگر Railway مانع UDP صوتی شد (سناریوی جایگزین VPS)
