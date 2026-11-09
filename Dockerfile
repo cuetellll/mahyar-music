@@ -4,12 +4,16 @@
 # Base:   Debian 12 (bookworm) slim
 # Engine: TS3AudioBot 0.12.0 – official self-contained linux-x64 release build
 #         (the .NET runtime is bundled; no .NET installation is required)
-# Needs:  ffmpeg (transcoding) + libopus (voice codec)
+# Needs:  ffmpeg (transcoding) + libopus (voice codec) + libssl1.1 (.NET TLS)
 #
-# NOTE: no libicu on purpose — the pinned .NET Core 3.1 runtime inside the
+# NOTE 1: no libicu on purpose — the pinned .NET Core 3.1 runtime inside the
 # 0.12.0 build only knows ICU <= 67 and would FailFast on Debian 12's ICU 72.
 # The entrypoint sets DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 instead (safe
 # for this bot; no locale formatting is used).
+# NOTE 2: the same runtime requires OpenSSL 1.1 (libssl.so.1.1) and crashes at
+# startup with "No usable version of libssl was found" on Debian 12 (which
+# ships only OpenSSL 3). The last bullseye libssl1.1 package is installed
+# below, pinned by sha256 from the official Debian archive.
 #
 # The release tarball is pinned by version AND sha256 below. Verified on
 # 2026-11-09 against https://github.com/Splamy/TS3AudioBot/releases/tag/0.12.0
@@ -31,6 +35,19 @@ RUN apt-get update \
 		gosu \
 		libopus0 \
 	&& rm -rf /var/lib/apt/lists/*
+
+# OpenSSL 1.1 for the .NET Core 3.1 runtime (see NOTE 2 above).
+# Pinned: libssl1.1_1.1.1w-0+deb11u1_amd64.deb from archive.debian.org,
+# verified 2026-11-09. License notices land in
+# /usr/share/doc/libssl1.1/copyright.
+ARG LIBSSL11_VERSION=1.1.1w-0+deb11u1
+ARG LIBSSL11_SHA256=aadf8b4b197335645b230c2839b4517aa444fd2e8f434e5438c48a18857988f7
+RUN curl -fsSL -o /tmp/libssl1.1.deb \
+		"https://archive.debian.org/debian/pool/main/o/openssl/libssl1.1_${LIBSSL11_VERSION}_amd64.deb" \
+	&& echo "${LIBSSL11_SHA256}  /tmp/libssl1.1.deb" | sha256sum -c - \
+	&& dpkg -i /tmp/libssl1.1.deb \
+	&& rm -f /tmp/libssl1.1.deb \
+	&& ldconfig
 
 # Download the pinned release, verify its checksum, extract.
 # Tarball contents: the self-contained "TS3AudioBot" binary + WebInterface/.
