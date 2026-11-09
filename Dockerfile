@@ -14,6 +14,11 @@
 # startup with "No usable version of libssl was found" on Debian 12 (which
 # ships only OpenSSL 3). The last bullseye libssl1.1 package is installed
 # below, pinned by sha256 from the official Debian archive.
+# NOTE 3: the bot's native loader probes an UNVERSIONED "libopus.so"
+# (upstream's InstallOpus.sh copies .libs/libopus.so to /usr/lib). Debian's
+# libopus0 only ships libopus.so.0; libopus-dev provides the libopus.so link
+# the DllImport probe order ("libopus" -> "libopus.so" -> "liblibopus.so")
+# resolves.
 #
 # The release tarball is pinned by version AND sha256 below. Verified on
 # 2026-11-09 against https://github.com/Splamy/TS3AudioBot/releases/tag/0.12.0
@@ -33,7 +38,7 @@ RUN apt-get update \
 		curl \
 		ffmpeg \
 		gosu \
-		libopus0 \
+		libopus-dev \
 	&& rm -rf /var/lib/apt/lists/*
 
 # OpenSSL 1.1 for the .NET Core 3.1 runtime (see NOTE 2 above).
@@ -57,7 +62,8 @@ RUN curl -fsSL -o /tmp/ts3ab.tar.gz \
 	&& mkdir -p /opt/ts3audiobot \
 	&& tar -xzf /tmp/ts3ab.tar.gz -C /opt/ts3audiobot \
 	&& rm -f /tmp/ts3ab.tar.gz \
-	&& chmod 0755 /opt/ts3audiobot/TS3AudioBot
+	&& chmod 0755 /opt/ts3audiobot/TS3AudioBot \
+	&& ln -sf /usr/lib/x86_64-linux-gnu/libopus.so.0 /opt/ts3audiobot/libopus.so
 
 # Dedicated unprivileged user for the bot process.
 # The entrypoint starts as root only to prepare /data, then drops privileges.
